@@ -16,6 +16,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION
 $currentDayOfWeek = date('l'); // Full textual representation of the day (e.g., Monday)
 $currentTime = date('H:i:s'); 
 
+// Handle schedule selection from dropdown
+$selectedScheduleId = isset($_POST['schedule']) ? $_POST['schedule'] : null;
+
 // Query to get the current schedule
 $scheduleQuery = "SELECT s.id, s.day_of_week, s.start_time, s.end_time, su.subject_name, se.section_name
                  FROM schedules s
@@ -42,7 +45,14 @@ if ($scheduleResult->num_rows > 0) {
     $currentScheduleId = $scheduleInfo['id'];
 }
 
-// Query to get attendance details for the current schedule
+// If no schedule is selected, use the current schedule
+$activeScheduleId = $selectedScheduleId ? $selectedScheduleId : $currentScheduleId;
+
+// Default to current date if no date is selected
+$selectedDate = isset($_POST['attendance_date']) ? $_POST['attendance_date'] : date('Y-m-d');
+$selectedScheduleId = isset($_POST['schedule']) && !empty($_POST['schedule']) ? $_POST['schedule'] : $currentScheduleId;
+
+// Adjust the query to filter by the selected date and schedule
 $attendanceQuery = "
     SELECT 
         a.date,
@@ -56,7 +66,8 @@ $attendanceQuery = "
         attendance a
         JOIN users u ON a.users_id = u.id
     WHERE 
-        a.schedules_id = ?
+        a.schedules_id = ? 
+        AND a.date = ?
 ";
 
 $attendanceStmt = $conn->prepare($attendanceQuery);
@@ -65,9 +76,17 @@ if ($attendanceStmt === false) {
     die('Prepare failed: ' . htmlspecialchars($conn->error));
 }
 
-$attendanceStmt->bind_param("i", $currentScheduleId);
+$attendanceStmt->bind_param("is", $selectedScheduleId, $selectedDate);
 $attendanceStmt->execute();
 $attendanceResult = $attendanceStmt->get_result();
+
+// Query to get all schedules for the dropdown
+$scheduleDropdownQuery = "SELECT s.id, CONCAT(s.day_of_week, ' ', s.start_time, '-', s.end_time, ' ', su.subject_name, ' ', se.section_name) AS schedule_info
+                          FROM schedules s
+                          INNER JOIN subject su ON s.subject_id = su.subject_id
+                          INNER JOIN section se ON s.section_id = se.section_id";
+
+$dropdownResult = $conn->query($scheduleDropdownQuery);
 ?>
 
 <!DOCTYPE html>
@@ -141,15 +160,40 @@ $attendanceResult = $attendanceStmt->get_result();
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
-                <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="mt-4">Student Attendance</h1>
-                    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Attendance Report</a>
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="mt-4">Student Attendance</h1>
+                
+                <!-- Wrap the form inside a div and use Bootstrap classes to adjust size and spacing -->
+                <div class="d-inline-block me-2">
+                <form method="post" action="">
+                    <div class="form-group mb-0 d-flex align-items-center">
+                        <!-- Schedule Dropdown -->
+                        <select id="scheduleSelect" name="schedule" class="form-select form-select-sm me-2" onchange="this.form.submit()" style="width: auto;">
+                            <option value="">-- Show Current Schedule --</option>
+                            <?php
+                            if ($dropdownResult->num_rows > 0) {
+                                while ($row = $dropdownResult->fetch_assoc()) {
+                                    $selected = ($row['id'] == $activeScheduleId) ? 'selected' : '';
+                                    echo "<option value='" . htmlspecialchars($row['id']) . "' $selected>" . htmlspecialchars($row['schedule_info']) . "</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                        
+                        <!-- Date Input -->
+                        <input type="date" name="attendance_date" class="form-control form-control-sm me-2" value="<?php echo isset($_POST['attendance_date']) ? htmlspecialchars($_POST['attendance_date']) : ''; ?>" onchange="this.form.submit()" style="width: auto;">
+                    </div>
+                </form>
                 </div>
+
+                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Attendance Report</a>
+            </div>
                 <div class="card mb-4">
                     <div class="card-header">
                         <i class="fas fa-table me-1"></i>
                         Student Attendance
                     </div>
+                   
                     <div class="card-body">
                         <table id="datatablesSimple">
                             <thead>
@@ -163,7 +207,7 @@ $attendanceResult = $attendanceStmt->get_result();
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php
+                            <?php
                                 if ($attendanceResult->num_rows > 0) {
                                     while ($row = $attendanceResult->fetch_assoc()) {
                                         echo "<tr>";
@@ -176,7 +220,7 @@ $attendanceResult = $attendanceStmt->get_result();
                                         echo "</tr>";
                                     }
                                 } else {
-                                    echo "<tr><td colspan='6'>No attendance records found for the current schedule.</td></tr>";
+                                    echo "<tr><td colspan='6'>No attendance records found for the selected schedule.</td></tr>";
                                 }
                                 ?>
                             </tbody>

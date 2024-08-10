@@ -31,6 +31,7 @@ $result = $conn->query($sql);
     <link href="css/styles.css" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
     <script>
    const Toast = Swal.mixin({
     toast: true,
@@ -139,51 +140,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button  type="button" class="btn btn-primary btn-lg"><i class="fas fa-download fa-sm text-white"></i> Add Schedules</button>
                     </a>
                 </div>
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-table me-1"></i>
-                        Schedules
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered" id="datatablesSimple">
-                            <thead>
-                                <tr>
-                                    <th>Day</th>
-                                    <th>START TIME</th>
-                                    <th>END TIME</th>
-                                    <th>SUBJECT</th>
-                                    <th>SECTION</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            <?php
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    $startTime = new DateTime($row['start_time']);
-                                    $endTime = new DateTime($row['end_time']);
-                                    $formattedStartTime = $startTime->format('h:i A');
-                                    $formattedEndTime = $endTime->format('h:i A');
-                                    echo "<tr onclick=\"window.location.href='editSchedule.php?id={$row['id']}'\">";
-                                    echo "<td>" . htmlspecialchars($row['day_of_week']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($formattedStartTime) . "</td>";
-                                    echo "<td>" . htmlspecialchars($formattedEndTime) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['subject_name']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['section_name']) . "</td>";
-                                    echo "<td>
-                                    <a class='btn btn-primary btn-circle btn-sm' href='editSchedule.php?id={$row['id']}'><i class='fas fa-edit'></i></a>
-                                    <a class='btn btn-danger btn-circle btn-sm' href='#' onclick='confirmDelete({$row['id']})'><i class='fas fa-trash'></i></a>
-                                  </td>";
-                                    echo "</tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='6'>No schedule found</td></tr>";
-                            }
-                            ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <?php include('scheduleTable.php'); ?>
+
             </div>
         </main>
         <footer class="py-4 bg-light mt-auto">

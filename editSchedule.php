@@ -222,6 +222,11 @@ $sections = $conn->query($sectionSql);
                                     <button type="submit" class="btn btn-primary btn-block">Edit Schedule</button>
                                 </div>
                             </div>
+                            <div class="mt-2 mb-0">
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-danger btn-block" onclick="confirmDelete(<?php echo $scheduleId; ?>)">Delete Schedule</button>
+                                </div>
+                            </div>
                         </form>
 
                     </div>
@@ -254,5 +259,29 @@ $sections = $conn->query($sectionSql);
 <script src="assets/demo/chart-bar-demo.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
 <script src="js/datatables-simple-demo.js"></script>
+<script>
+    function confirmDelete(scheduleId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will not be able to recover this schedule!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Proceed with deletion
+                window.location.href = `scheduleDelete.php?action=delete&id=${scheduleId}`;
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire(
+                    'Cancelled',
+                    'Your schedule is safe :)',
+                    'error'
+                );
+            }
+        });
+    }
+</script>
 </body>
 </html>
