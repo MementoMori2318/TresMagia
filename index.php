@@ -35,6 +35,28 @@ $stmt = $conn->prepare($scheduleQuery);
 $stmt->bind_param("ss", $currentDayOfWeek, $currentTime);
 $stmt->execute();
 $result = $stmt->get_result();
+
+$logDate = isset($_POST['log_date']) ? $_POST['log_date'] : null;
+            
+if ($logDate) {
+    $logsQuery = "SELECT l.id, l.log_type, l.event_type, l.event_description, l.date_logged, u.name, u.role, u.cards_uid 
+                  FROM logs l
+                  INNER JOIN users u ON l.users_id = u.id
+                  WHERE DATE(l.date_logged) = ?";
+    $stmt = $conn->prepare($logsQuery);
+    $stmt->bind_param("s", $logDate);
+} else {
+    // Fetch all logs or the most recent logs closest to the current date
+    $logsQuery = "SELECT l.id, l.log_type, l.event_type, l.event_description, l.date_logged, u.name, u.role, u.cards_uid 
+                  FROM logs l
+                  INNER JOIN users u ON l.users_id = u.id
+                  ORDER BY l.date_logged DESC
+                  LIMIT 100"; // Adjust the LIMIT as needed
+    $stmt = $conn->prepare($logsQuery);
+}
+
+$stmt->execute();
+$logsResult = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -243,111 +265,49 @@ $result = $stmt->get_result();
                     <div class="card-header">
                         <i class="fas fa-table me-1"></i>
                         Recently Logged-in Users
+                        <form method="POST" class="d-inline-block float-end">
+                            <input type="date" name="log_date" class="form-control form-control-sm me-2" 
+                                value="<?php echo isset($_POST['log_date']) ? htmlspecialchars($_POST['log_date']) : ''; ?>" 
+                                onchange="this.form.submit()" style="width: auto;">
+                        </form>
                     </div>
                     <div class="card-body">
+                        
                         <table id="datatablesSimple">
                             <thead>
                                 <tr>
-                                    <th>User Type</th>
-                                    <th>Card UID</th>      
-                                    <th>NAME</th>                      
-                                    <th>DATE</th>
-                                   
+                                    <th>Log Type</th>
+                                    <th>Event Type</th>
+                                    <th>Description</th>
+                                    <th>Date Logged</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Card UID</th>
                                 </tr>
                             </thead>
                             
                             <tbody>
-                                <tr>
-                                    <td>Student</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Joanne Barker</td>
-                                    <td>May 17, 2024</td>
-                                 
-                                </tr>
-                                <tr>
-                                    <td>Faculty</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Charles Preston</td>                        
-                                    <td>May 17, 2024</td>
-                                    
-                                </tr>
-                                <tr>
-                                    <td>Student</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Karol Rowland</td>                                  
-                                    <td>May 17, 2024</td>
-                                   
-                                <tr>
-                                    <td>Student</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Joanne Barker</td>
-                                    <td>May 17, 2024</td>
-                                   
-                                </tr>
-                                <tr>
-                                    <td>Faculty</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Charles Preston</td>                        
-                                    <td>May 17, 2024</td>
-                                   
-                                </tr>
-                                <tr>
-                                    <td>Student</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Karol Rowland</td>                                  
-                                    <td>May 17, 2024</td>
-                                   
-                                <tr>
-                                    <td>Student</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Joanne Barker</td>
-                                    <td>May 17, 2024</td>
-                                    
-                                </tr>
-                                <tr>
-                                    <td>Faculty</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Charles Preston</td>                        
-                                    <td>May 17, 2024</td>
-                                    
-                                </tr>
-                                <tr>
-                                    <td>Student</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Karol Rowland</td>                                  
-                                    <td>May 17, 2024</td>
-                                    
-                                <tr>
-                                    <td>Student</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Joanne Barker</td>
-                                    <td>May 17, 2024</td>
-                                   
-                                </tr>
-                                <tr>
-                                    <td>Faculty</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Charles Preston</td>                        
-                                    <td>May 17, 2024</td>
-                                    
-                                </tr>
-                                <tr>
-                                    <td>Student</td>
-                                    <td>C4R03XAM4P1E</td>        
-                                    <td>Karol Rowland</td>                                  
-                                    <td>May 17, 2024</td>
-                                    
-                                </tr>
+                            <?php
+                                if ($logsResult->num_rows > 0) {
+                                    while ($row = mysqli_fetch_assoc($logsResult)) {
+                                        echo '<tr>';
+                                        echo '<td>' . htmlspecialchars($row['log_type']) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row['event_type']) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row['event_description']) . '</td>';
+                                        echo '<td>' . htmlspecialchars(date("F j, Y, g:i a", strtotime($row['date_logged']))) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row['name']) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row['role']) . '</td>';
+                                        echo '<td>' . htmlspecialchars($row['cards_uid']) . '</td>';
+                                        echo '</tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan="7">No logs found.</td></tr>';
+                                }
+                                ?>
                             </tbody>
                         </table>
                     
                 
-
-
-
-
-
-
 <!-- End of Main Content -->
             
         </main>

@@ -217,16 +217,13 @@ $sections = $conn->query($sectionSql);
                                         </div>
                                     </div>
                                 </div>
-                            <div class="mt-4 mb-0">
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-block">Edit Schedule</button>
+                         
+                             <!-- Submit and Cancel Buttons -->
+                             <div class="d-flex justify-content-between mt-4 mb-0">
+                             <button type="submit" class="btn btn-primary btn-block">Edit Schedule</button>
+                             <button type="button" class="btn btn-danger btn-block" onclick="confirmDelete(<?php echo $scheduleId; ?>)">Delete Schedule</button>
+                                    <a href="schedule.php" class="btn btn-secondary">Cancel</a>
                                 </div>
-                            </div>
-                            <div class="mt-2 mb-0">
-                                <div class="d-grid">
-                                    <button type="button" class="btn btn-danger btn-block" onclick="confirmDelete(<?php echo $scheduleId; ?>)">Delete Schedule</button>
-                                </div>
-                            </div>
                         </form>
 
                     </div>

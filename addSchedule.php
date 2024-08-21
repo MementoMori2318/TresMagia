@@ -15,6 +15,10 @@ $subjectResult = $conn->query($subjectSql);
 // Query to select sections
 $sectionSql = "SELECT section_id, section_name FROM section";
 $sectionResult = $conn->query($sectionSql);
+
+// Query to select users
+$userSql = "SELECT id, role, cards_uid, name, year_section FROM users";
+$userResult = $conn->query($userSql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -349,6 +353,42 @@ $sectionResult = $conn->query($sectionSql);
                                         </div>
                                     </div>
                                 </div>
+                                 <!-- New User Selection Table -->
+                        <h3 class="mt-4">Pick Users to Use this Schedule</h3>
+                       
+                            <table id="datatablesSimple">
+                                <thead>
+                                    <tr>
+                                        <th data-sortable="false">
+                                            <input type="checkbox" id="checkAll" style="position: absulote; z-index: 1; margin-right: 5px;">
+                                            Select All
+                                        </th>
+                                        <th>User Role</th>
+                                        <th>Card UID</th>
+                                        <th>Name</th>
+                                        <th>Year Course & Section</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if ($userResult->num_rows > 0) {
+                                        while ($row = $userResult->fetch_assoc()) {
+                                            echo "<tr>";
+                                            echo "<td><input type='checkbox' name='selected_users[]' value='{$row['id']}' class='user-checkbox'></td>";
+                                            echo "<td>" . htmlspecialchars($row['role']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['cards_uid']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['year_section']) . "</td>";
+                                            echo "</tr>";
+                                        }
+                                    } else {
+                                        echo "<tr><td colspan='5'>No users available</td></tr>";
+                                    }
+                                    ?>
+                                </tbody>
+                                
+                            </table>
+                            
                             <div class="mt-4 mb-0">
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary btn-block">Add Schedule</button>
@@ -437,7 +477,12 @@ function togglePopupSection() {
     overlay.classList.toggle('show');
 }
 
-
+document.getElementById('checkAll').addEventListener('change', function() {
+        var checkboxes = document.querySelectorAll('.user-checkbox');
+        for (var checkbox of checkboxes) {
+            checkbox.checked = this.checked;
+        }
+    });
 
 </script>
 

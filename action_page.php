@@ -256,14 +256,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_schedule'])) {
 
     // Execute the query
     if ($stmt->execute()) {
-        $success_message = "Schedule added successfully";
-        // Close the statement and connection
+        // Get the last inserted schedule_id
+        $scheduleId = $stmt->insert_id;
+
+        // Insert user_schedules records
+        if (!empty($selectedUsers)) {
+            $stmt = $conn->prepare("INSERT INTO user_schedules (user_id, schedule_id) VALUES (?, ?)");
+            if ($stmt === false) {
+                die("Error preparing statement: " . $conn->error);
+            }
+
+            foreach ($selectedUsers as $userId) {
+                $stmt->bind_param("ii", $userId, $scheduleId);
+                if (!$stmt->execute()) {
+                    echo "Error: " . $stmt->error;
+                }
+            }
+
+            // Close the user_schedules statement
+            $stmt->close();
+        }
+
+        // Close the schedules statement and connection
         $stmt->close();
         $conn->close();
 
         // Redirect to the same page after successful insertion
+        $success_message = "Schedule added successfully";
         header("Location: schedule.php?success_message=" . urlencode($success_message));
-        
         exit();
     } else {
         echo "Error: " . $stmt->error;
@@ -277,7 +297,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_schedule'])) {
 
 // Edit user 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['user_id'])) {
-    
+
     // Initialize variables with form data
     $user_id = $_POST['user_id'];
     $name = $_POST['name'];
@@ -303,30 +323,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['user_id'])) {
     $query_user = "UPDATE users SET name=?, role=?, user_id=?, cards_uid=?, year_section=?, email=?, password=? WHERE id=?";
     $stmt_user = $conn->prepare($query_user);
     $stmt_user->bind_param("sssssssi", $name, $userRole, $userId, $inputCardUid, $inputYearSection, $email, $password, $user_id);
-    
+
     if (!$stmt_user->execute()) {
         echo "Error updating user: " . $stmt_user->error;
         exit;
     }
 
     // Update user schedules
-    if (isset($_POST['userSchedule'])) {
-        // Start a transaction for atomicity
-        $conn->begin_transaction();
+    // Start a transaction for atomicity
+    $conn->begin_transaction();
 
-        try {
-            // Delete existing schedules that are not selected
-            $query_delete = "DELETE FROM user_schedules WHERE users_id=? AND schedules_id NOT IN (?)";
-            $stmt_delete = $conn->prepare($query_delete);
-            $stmt_delete->bind_param("is", $user_id, $schedule_id);
+    try {
+        // Delete all existing schedules for the user
+        $query_delete_all = "DELETE FROM user_schedules WHERE users_id=?";
+        $stmt_delete_all = $conn->prepare($query_delete_all);
+        $stmt_delete_all->bind_param("i", $user_id);
+        $stmt_delete_all->execute();
+        $stmt_delete_all->close();
 
-            foreach ($_POST['userSchedule'] as $schedule_id) {
-                $stmt_delete->execute();
-            }
-
-            $stmt_delete->close();
-
-            // Insert new schedules that are selected but not existing
+        // Insert new schedules if any are selected
+        if (isset($_POST['userSchedule']) && !empty($_POST['userSchedule'])) {
             $query_insert = "INSERT INTO user_schedules (users_id, schedules_id) VALUES (?, ?)";
             $stmt_insert = $conn->prepare($query_insert);
             $stmt_insert->bind_param("ii", $user_id, $schedule_id);
@@ -336,27 +352,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['user_id'])) {
             }
 
             $stmt_insert->close();
-
-            // Commit transaction
-            $conn->commit();
-
-            // Redirect with success message
-            $success_message = "User edited successfully";
-            header("Location: usersList.php?success_message=" . urlencode($success_message));
-            exit;
-
-        } catch (Exception $e) {
-            // Rollback transaction on error
-            $conn->rollback();
-            echo "Error updating user schedules: " . $e->getMessage();
         }
-    } else {
-        // No schedules selected, do any other handling here if needed
+
+        // Commit transaction
+        $conn->commit();
+
+        // Redirect with success message
+        $success_message = "User edited successfully";
+        header("Location: usersList.php?success_message=" . urlencode($success_message));
+        exit;
+
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        echo "Error updating user schedules: " . $e->getMessage();
     }
 
     // Close statement
     $stmt_user->close();
-} 
+}
+
     // End Edit user 
 
 

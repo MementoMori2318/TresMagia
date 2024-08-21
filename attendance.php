@@ -60,7 +60,7 @@ $attendanceQuery = "
         a.time_out,
         u.name,
         u.id,
-        u.cards_uid,
+        u.user_id,
         CONCAT(u.year_section, ' - ') AS year_course_section
     FROM 
         attendance a
@@ -186,7 +186,9 @@ $dropdownResult = $conn->query($scheduleDropdownQuery);
                 </form>
                 </div>
 
-                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Attendance Report</a>
+                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#generateReportModal">
+                    <i class="fas fa-download fa-sm text-white-50"></i> Generate Attendance Report
+                </a>
             </div>
                 <div class="card mb-4">
                     <div class="card-header">
@@ -212,7 +214,7 @@ $dropdownResult = $conn->query($scheduleDropdownQuery);
                                     while ($row = $attendanceResult->fetch_assoc()) {
                                         echo "<tr>";
                                         echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($row['cards_uid']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['user_id']) . "</td>";
                                         echo "<td>" . htmlspecialchars($row['year_course_section']) . "</td>";
                                         echo "<td>" . date('F d, Y', strtotime($row['date'])) . "</td>";
                                         echo "<td>" . date('h:i A', strtotime($row['time_in'])) . "</td>";
@@ -243,6 +245,33 @@ $dropdownResult = $conn->query($scheduleDropdownQuery);
                 </div>
             </div>
         </footer>
+    </div>
+</div>
+<!-- Modal HTML -->
+<div class="modal fade" id="generateReportModal" tabindex="-1" aria-labelledby="generateReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateReportModalLabel">Generate Attendance Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Would you like to download the Attendance report for this schedule</p>
+                <form id="reportForm" method="post" action="generateReport.php">
+                    <div class="mb-3">
+                        <!-- <label for="reportEmail" class="form-label">Email to:</label> -->
+                        <!-- <input type="email" class="form-control" id="reportEmail" name="report_email" placeholder="Enter email address"> -->
+                    </div>
+                    <input type="hidden" name="schedule_id" value="<?php echo htmlspecialchars($selectedScheduleId); ?>">
+                    <input type="hidden" name="attendance_date" value="<?php echo htmlspecialchars($selectedDate); ?>">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" form="reportForm" name="action" value="download">Download Now</button>
+                <!-- <button type="submit" class="btn btn-secondary" form="reportForm" name="action" value="email">Email Report</button> -->
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
     </div>
 </div>
 

@@ -48,6 +48,8 @@ $stmt_user_schedules->close();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+
 ?>
 
 <!DOCTYPE html>
@@ -132,104 +134,102 @@ error_reporting(E_ALL);
                     </div>
                     <div class="card-body">
                     <form action="action_page.php" method="POST">
-    <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($user['id']); ?>">
-    <!-- User Details Section -->
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="form-floating mb-3 mb-md-0">
-                <input class="form-control" id="inputName" name="name" type="text" placeholder="Enter Name" value="<?php echo htmlspecialchars($user['name']); ?>" required/>
-                <label for="inputName">Name</label>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-floating">
-                <select class="form-select form-control" aria-label="Default select example" id="inputUserRole" name="userRole" required>
-                    <option value="student" <?php if ($user['role'] == 'Student') echo 'selected'; ?>>Student</option>
-                    <option value="staff" <?php if ($user['role'] == 'Staff') echo 'selected'; ?>>Staff</option>
-                    <option value="faculty" <?php if ($user['role'] == 'Faculty') echo 'selected'; ?>>Faculty</option>
-                    <option value="admin" <?php if ($user['role'] == 'Admin') echo 'selected'; ?>>Admin</option>
-                </select>
-                <label for="inputUserRole">User Type</label>
-            </div>
-        </div>
-    </div>
-    <div class="form-floating mb-3">
-        <input class="form-control" id="inputUserId" name="userId" type="text" placeholder="C21102307" value="<?php echo htmlspecialchars($user['user_id']); ?>" required/>
-        <label for="inputUserId">User ID</label>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="form-floating mb-3">
-                <input class="form-control" id="inputCardUid" name="inputCardUid" type="text" placeholder="Card UID" value="<?php echo htmlspecialchars($user['cards_uid']); ?>" required/>
-                <label for="inputCardUid">Tap Card</label>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-floating mb-3 mb-md-0">
-                <input class="form-control" id="inputYearSection" name="inputYearSection" type="text" placeholder="BSIT - 3C" value="<?php echo htmlspecialchars($user['year_section']); ?>" />
-                <label for="inputYearSection">Year & Section</label>
-            </div>
-        </div>
-    </div>
-    <div class="form-floating mb-3">
-        <input class="form-control" id="inputEmail" name="email" type="email" placeholder="name@example.com" value="<?php echo htmlspecialchars($user['email']); ?>" required/>
-        <label for="inputEmail">Email address</label>
-    </div>
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="form-floating mb-3 mb-md-0">
-                <input class="form-control" id="inputPassword" name="password" type="password" placeholder="Create a password" value="<?php echo htmlspecialchars($user['password']); ?>" />
-                <label for="inputPassword">Password</label>
-            </div>
-        </div>
-    </div>
+                                <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($user['id']); ?>">
 
-    <!-- User Schedules Section -->
-    <div class="row mb-3">
-    <label class="col-form-label">User Schedules:</label>
-    <div class="col">
-        <div class="form-check">
-        <div class="control">
-                <input class="form-control mb-3" type="text" placeholder="Search" id="search" />
-                <span class="icon is-small is-left">
-                    <span class="searchIcon"></span>
-                </span>
-            </div>
-            <?php
-            if ($result_schedules->num_rows > 0) {
-                while ($row = $result_schedules->fetch_assoc()) {
-                    $checked = in_array($row['id'], $user_schedules) ? 'checked' : '';
+                                <!-- User Details Section -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3 mb-md-0">
+                                            <input class="form-control" id="inputName" name="name" type="text" placeholder="Enter Name" value="<?php echo htmlspecialchars($user['name']); ?>" required/>
+                                            <label for="inputName">Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <select class="form-select form-control" aria-label="Default select example" id="inputUserRole" name="userRole" required>
+                                                <option value="student" <?php if ($user['role'] == 'Student') echo 'selected'; ?>>Student</option>
+                                                <option value="staff" <?php if ($user['role'] == 'Staff') echo 'selected'; ?>>Staff</option>
+                                                <option value="faculty" <?php if ($user['role'] == 'Faculty') echo 'selected'; ?>>Faculty</option>
+                                                <option value="admin" <?php if ($user['role'] == 'Admin') echo 'selected'; ?>>Admin</option>
+                                            </select>
+                                            <label for="inputUserRole">User Type</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" id="inputUserId" name="userId" type="text" placeholder="C21102307" value="<?php echo htmlspecialchars($user['user_id']); ?>" required/>
+                                    <label for="inputUserId">User ID</label>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" id="inputCardUid" name="inputCardUid" type="text" placeholder="Card UID" value="<?php echo htmlspecialchars($user['cards_uid']); ?>" required/>
+                                            <label for="inputCardUid">Tap Card</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3 mb-md-0">
+                                            <input class="form-control" id="inputYearSection" name="inputYearSection" type="text" placeholder="BSIT - 3C" value="<?php echo htmlspecialchars($user['year_section']); ?>" />
+                                            <label for="inputYearSection">Year & Section</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" id="inputEmail" name="email" type="email" placeholder="name@example.com" value="<?php echo htmlspecialchars($user['email']); ?>" required/>
+                                    <label for="inputEmail">Email address</label>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3 mb-md-0">
+                                            <input class="form-control" id="inputPassword" name="password" type="password" placeholder="Create a password" value="********" maxlength="8" />
+                                            <label for="inputPassword">Password</label>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    // Convert start and end times to 12-hour format
-                    $start_time = new DateTime($row['start_time']);
-                    $end_time = new DateTime($row['end_time']);
-                    $formatted_start_time = $start_time->format('g:i A');
-                    $formatted_end_time = $end_time->format('g:i A');
+                                <!-- User Schedules Section -->
+                                <div class="row mb-3">
+                                    <label class="col-form-label">User Schedules:</label>
+                                    <div class="col">
+                                        <div class="form-check">
+                                            <div class="control">
+                                                <input class="form-control mb-3" type="text" placeholder="Search" id="search" />
+                                                <span class="icon is-small is-left">
+                                                    <span class="searchIcon"></span>
+                                                </span>
+                                            </div>
+                                            <?php
+                                            if ($result_schedules->num_rows > 0) {
+                                                while ($row = $result_schedules->fetch_assoc()) {
+                                                    $checked = in_array($row['id'], $user_schedules) ? 'checked' : '';
 
-                    echo '<div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="' . $row['id'] . '" id="schedule_' . $row['id'] . '" name="userSchedule[]" ' . $checked . '>
-                            <label class="form-check-label" for="schedule_' . $row['id'] . '">
-                                ' . htmlspecialchars($row['day_of_week']) . ' ' . htmlspecialchars($formatted_start_time) . ' - ' . htmlspecialchars($formatted_end_time) . ' (Subject: ' . htmlspecialchars($row['subject_name']) . ', Section: ' . htmlspecialchars($row['section_name']) . ')
-                            </label>
-                        </div>';
-                }
-            } else {
-                echo '<p>No schedules available</p>';
-            }
-            ?>
+                                                    // Convert start and end times to 12-hour format
+                                                    $start_time = new DateTime($row['start_time']);
+                                                    $end_time = new DateTime($row['end_time']);
+                                                    $formatted_start_time = $start_time->format('g:i A');
+                                                    $formatted_end_time = $end_time->format('g:i A');
 
-        </div>
-    </div>
-</div>
+                                                    echo '<div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="' . $row['id'] . '" id="schedule_' . $row['id'] . '" name="userSchedule[]" ' . $checked . '>
+                                                            <label class="form-check-label" for="schedule_' . $row['id'] . '">
+                                                                ' . htmlspecialchars($row['day_of_week']) . ' ' . htmlspecialchars($formatted_start_time) . ' - ' . htmlspecialchars($formatted_end_time) . ' (Subject: ' . htmlspecialchars($row['subject_name']) . ', Section: ' . htmlspecialchars($row['section_name']) . ')
+                                                            </label>
+                                                        </div>';
+                                                }
+                                            } else {
+                                                echo '<p>No schedules available</p>';
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
 
-    <!-- Submit and Delete Buttons -->
-    <div class="mt-4 mb-0">
-        <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-block">Edit User</button>
-        </div>
-    </div>
-   
-</form>
+                                <!-- Submit and Cancel Buttons -->
+                                <div class="d-flex justify-content-between mt-4 mb-0">
+                                    <button type="submit" class="btn btn-primary">Edit User</button>
+                                    <a href="usersList.php" class="btn btn-secondary">Cancel</a>
+                                </div>
+                            </form>
 
                     </div>
                 </div>
@@ -289,6 +289,24 @@ document.addEventListener('DOMContentLoaded', function() {
             element.style.display = labelContent.includes(searchValue) ? "block" : "none";
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    var passwordInput = document.getElementById('inputPassword');
+
+    // Function to display fixed-length asterisks in the password field
+    function setPasswordFieldLength() {
+        var maxLength = 8;
+        var currentValue = passwordInput.value;
+        var displayValue = '********'; // Default fixed-length display
+        if (currentValue.length > maxLength) {
+            displayValue = currentValue.substring(0, maxLength) + '...'; // Trim and add ellipsis if needed
+        }
+        passwordInput.value = displayValue;
+    }
+
+    // Initial call to set the fixed-length display
+    setPasswordFieldLength();
+});
 </script>
 
 </body>

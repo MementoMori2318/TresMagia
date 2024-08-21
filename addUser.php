@@ -95,7 +95,37 @@ function clearCardData() {
 document.addEventListener("DOMContentLoaded", function() {
     updateCardData();
 });
+function updateCardData() {
+    fetch('card_data.txt')
+        .then(response => response.text()) // Parse as text
+        .then(data => {
+            if (data.trim() && data.trim() !== "None") {
+                document.getElementById('inputCardUid').value = data.trim();
+                console.log("Card ID:", data.trim());
 
+                // Check if the card ID is already registered
+                fetch('check_card.php?cards_uid=' + data.trim())
+                    .then(response => response.json())
+                    .then(result => {
+                        if (!result.isRegistered) {
+                            var unregisteredCardModal = new bootstrap.Modal(document.getElementById('unregisteredCardModal'));
+                            unregisteredCardModal.show();
+                        }
+                    })
+                    .catch(error => console.error("Error checking card:", error));
+
+                setTimeout(clearCardData, 5000);  // Clear the card data after 5 seconds
+            }
+            setTimeout(updateCardData, 100); // Repeat every 100ms
+        })
+        .catch(error => {
+            console.error("Error fetching card data:", error);
+            setTimeout(updateCardData, 100); // Repeat every 100ms even if there is an error
+        });
+}
+
+// Call updateCardData to start the loop
+updateCardData();
     </script>
     <style>
     .form-select {
@@ -303,7 +333,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-
+<?php include('card_id_modal.php'); ?>
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
