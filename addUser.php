@@ -6,7 +6,6 @@ session_start();
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION['role'] !== 'Admin') {
     header('Location: login.php');
     exit;
-
 }
 $sql = "SELECT s.id, s.day_of_week, s.start_time, s.end_time, sub.subject_name, sec.section_name 
         FROM schedules s
@@ -61,42 +60,8 @@ if (isset($_POST['search'])) {
             }
         });
     
-       function updateCardData() {
-        fetch('card_data.txt')
-            .then(response => response.text()) // Parse as text
-            .then(data => {
-                if (data.trim() && data.trim() !== "None") {
-                    document.getElementById('inputCardUid').value = data.trim();
-                    console.log("Card ID:", data.trim());
-                    setTimeout(clearCardData, 5000);  // Clear the card data after 5 seconds
-                }
-                setTimeout(updateCardData, 100); // Repeat every 100ms
-            })
-            .catch(error => {
-                console.error("Error fetching card data:", error);
-                setTimeout(updateCardData, 100); // Repeat every 100ms even if there is an error
-            });
-}
-
-function clearCardData() {
-    fetch('/addUser.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'clear_card_data=true'
-    }).then(response => {
-        if (response.ok) {
-            console.log("Card data cleared.");
-        }
-    });
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-    updateCardData();
-});
-function updateCardData() {
-    fetch('card_data.txt')
+        function updateCardData() {
+    fetch('card_data.txt?' + new Date().getTime()) // Adding a timestamp to prevent caching
         .then(response => response.text()) // Parse as text
         .then(data => {
             if (data.trim() && data.trim() !== "None") {
@@ -123,6 +88,25 @@ function updateCardData() {
             setTimeout(updateCardData, 100); // Repeat every 100ms even if there is an error
         });
 }
+
+
+    function clearCardData() {
+        fetch('addUser.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'clear_card_data=true'
+        }).then(response => {
+            if (response.ok) {
+                console.log("Card data cleared.");
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        updateCardData();
+    });
 
 // Call updateCardData to start the loop
 updateCardData();
@@ -225,7 +209,7 @@ updateCardData();
                     <div class="card-body">
                    
 
-                    <form action="action_page.php" method="POST">
+    <form action="action_page.php" method="POST">
     <input type="hidden" name="add_user" value="1">
     <div class="row mb-3">
         <div class="col-md-6">
@@ -246,21 +230,40 @@ updateCardData();
             </div>
         </div>
     </div>
-    <div class="form-floating mb-3">
-        <input class="form-control" id="inputUserId" name="userId" type="text" placeholder="C21102307" required/>
-        <label for="inputUserId">User ID</label>
-    </div>
     <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input class="form-control" id="inputUserId" name="userId" type="text" placeholder="C21102307" required/>
+                <label for="inputUserId">User ID</label>
+            </div>
+        </div>
         <div class="col-md-6">
             <div class="form-floating mb-3">
                 <input class="form-control" id="inputCardUid" name="inputCardUid" type="text" placeholder="Card UID" required/>
                 <label for="inputCardUid">Tap Card</label>
             </div>
         </div>
+    </div>
+    <div class="row mb-3">
         <div class="col-md-6">
-            <div class="form-floating mb-3 mb-md-0">
-                <input class="form-control" id="inputYearSection" name="inputYearSection" type="text" placeholder="BSIT - 3C"/>
-                <label for="inputYearSection">Year & Section</label>
+            <div class="form-floating mb-3">               
+                <select class="form-select form-control" aria-label="Default select example" id="inputYear" name="inputYear" required>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+                <label for="inputYear">Year</label>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating mb-3 mb-md-0">     
+                <select class="form-select form-control" aria-label="Default select example" id="inputCourse" name="inputCourse" required>
+                    <option value="BSIT">BSIT</option>
+                    <option value="BSIS">BSIS</option>
+                    <option value="BSCS">BSCS</option>
+                </select>
+                <label for="inputCourse">Course</label>
             </div>
         </div>
     </div>
@@ -344,35 +347,35 @@ updateCardData();
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
 <script src="js/datatables-simple-demo.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var inputUserRole = document.getElementById('inputUserRole');
-        var inputYearSection = document.getElementById('inputYearSection');
-        var inputPassword = document.getElementById('inputPassword');
+document.addEventListener('DOMContentLoaded', function() {
+    var inputUserRole = document.getElementById('inputUserRole');
+    var inputYear = document.getElementById('inputYear');
+    var inputCourse = document.getElementById('inputCourse');
+    var inputPassword = document.getElementById('inputPassword');
 
-        function handleUserRoleChange() {
-            var userRole = inputUserRole.value;
+    function handleUserRoleChange() {
+        var userRole = inputUserRole.value;
 
-            if (userRole === 'student') {
-                inputYearSection.disabled = false;
-            } else {
-                inputYearSection.value = "";  // Set to empty string when not student
-                inputYearSection.disabled = true;
-            }
-
-            if (userRole === 'admin') {
-                inputPassword.disabled = false;
-            } else {
-                inputPassword.disabled = true;
-            }
+        // If user role is 'admin', disable and clear year and course fields
+        if (userRole === 'admin') {
+            inputYear.value = "";   // Clear the year field
+            inputCourse.value = ""; // Clear the course field
+            inputYear.disabled = true;  // Disable the year field
+            inputCourse.disabled = true; // Disable the course field
+            inputPassword.disabled = false; // Enable password field for admin
+        } else {
+            // If not admin, enable year and course fields
+            inputYear.disabled = false;
+            inputCourse.disabled = false;
+            inputPassword.disabled = true;  // Disable password field for non-admins
         }
+    }
 
-        inputUserRole.addEventListener('change', handleUserRoleChange);
+    inputUserRole.addEventListener('change', handleUserRoleChange);
 
-        // Initial call to set the correct state on page load
-        handleUserRoleChange();
-
-
-    });       
+    // Initial call to set the correct state on page load
+    handleUserRoleChange();
+});
 
     const search = document.getElementById("search");
 const labels = document.querySelectorAll("#checkboxes2 > label");
