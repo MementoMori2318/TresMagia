@@ -9,15 +9,15 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION
 }
 
 // Query to select subjects
-$subjectSql = "SELECT subject_id, subject_name FROM subject";
+$subjectSql = "SELECT * FROM subject";
 $subjectResult = $conn->query($subjectSql);
 
 // Query to select sections
-$sectionSql = "SELECT section_id, section_name FROM section";
+$sectionSql = "SELECT * FROM section";
 $sectionResult = $conn->query($sectionSql);
 
 // Query to select users
-$userSql = "SELECT id, role, cards_uid, name, year_section FROM users";
+$userSql = "SELECT * FROM users";
 $userResult = $conn->query($userSql);
 ?>
 <!DOCTYPE html>
@@ -336,22 +336,39 @@ $userResult = $conn->query($userSql);
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-floating mb-3 mb-md-0">
-                                            <select class="form-select form-control" id="inputSection" name="section" required>
-                                                <option value="">Select a section</option>
-                                                <?php
-                                                if ($sectionResult->num_rows > 0) {
-                                                    // Output data of each row
-                                                    while($row = $sectionResult->fetch_assoc()) {
-                                                        echo '<option value="' . $row["section_id"] . '">' . $row["section_name"] . '</option>';
-                                                    }
-                                                } else {
-                                                    echo '<option value="">No sections available</option>';
+                                            <select class="form-select form-control" id="inputSection" name="section" required onchange="filterUsersBySection()">
+                                            <option value="">Select a section</option>
+                                            <?php
+                                            if ($sectionResult->num_rows > 0) {
+                                                while ($row = $sectionResult->fetch_assoc()) {
+                                                    echo '<option value="' . $row["section_id"] . '">' . $row["section_name"] . '</option>';
                                                 }
-                                                ?>
-                                            </select>
-                                            <label for="inputSection">Section</label>
-                                        </div>
+                                            } else {
+                                                echo '<option value="">No sections available</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                        <label for="inputSection">Section</label>
+                                    <script>
+                                        function filterUsersBySection() {
+                                            const sectionId = document.getElementById('inputSection').value;
+                                            
+                                            // Send AJAX request to fetch filtered users based on sectionId
+                                            const xhr = new XMLHttpRequest();
+                                            xhr.open('POST', 'fetch_users.php', true);
+                                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                                            xhr.onreadystatechange = function () {
+                                                if (xhr.readyState === 4 && xhr.status === 200) {
+                                                    // Update the table with the filtered users
+                                                    document.querySelector('#datatablesSimple tbody').innerHTML = xhr.responseText;
+                                                }
+                                            };
+                                            xhr.send('section_id=' + sectionId);
+                                            
+                                        }
+                                    </script>
                                     </div>
+                                </div>
                                 </div>
                                  <!-- New User Selection Table -->
                         <h3 class="mt-4">Pick Users to Use this Schedule</h3>
@@ -364,9 +381,10 @@ $userResult = $conn->query($userSql);
                                             Select All
                                         </th>
                                         <th>User Role</th>
-                                        <th>Card UID</th>
                                         <th>Name</th>
-                                        <th>Year Course & Section</th>
+                                        <th>Year</th>
+                                        <th>Course</th>
+                                        <th>Section</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -376,9 +394,10 @@ $userResult = $conn->query($userSql);
                                             echo "<tr>";
                                             echo "<td><input type='checkbox' name='selected_users[]' value='{$row['id']}' class='user-checkbox'></td>";
                                             echo "<td>" . htmlspecialchars($row['role']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['cards_uid']) . "</td>";
                                             echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['year_section']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['year']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['course']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['section']) . "</td>";
                                             echo "</tr>";
                                         }
                                     } else {
@@ -486,6 +505,8 @@ document.getElementById('checkAll').addEventListener('change', function() {
             checkbox.checked = this.checked;
         }
     });
+
+    
 
 </script>
 

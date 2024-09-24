@@ -8,7 +8,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION
     exit;
 }
 // Fetch user data from the database
-$query = "SELECT name, user_id, year_section FROM users WHERE role = 'Student'";
+$query = "SELECT name, user_id, year, course, section FROM users WHERE role = 'Student'";
 $result = mysqli_query($conn, $query);
 ?>
 
@@ -104,9 +104,9 @@ $result = mysqli_query($conn, $query);
                                 <tr>
                                     <th>NAME</th>
                                     <th>STUDENT ID</th>
-                                    <th>YEAR COURSE & SECTION</th>
-                                   
-                                    
+                                    <th>YEAR</th>
+                                    <th>COURSE</th>
+                                    <th>SECTION</th>
                                 </tr>
                             </thead>
                             
@@ -116,7 +116,9 @@ $result = mysqli_query($conn, $query);
                                 echo "<tr>";
                                 echo "<td>" . htmlspecialchars($row['name']) . "</td>";
                                 echo "<td>" . htmlspecialchars($row['user_id']) . "</td>";
-                                echo "<td>" . htmlspecialchars($row['year_section']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['year']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['course']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['section']) . "</td>";
                                 echo "</tr>";
                             }
                         } else {

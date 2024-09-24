@@ -245,8 +245,8 @@ updateCardData();
         </div>
     </div>
     <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="form-floating mb-3">               
+        <div class="col-md-4">
+            <div class="form-floating mb-3 mb-md-0">               
                 <select class="form-select form-control" aria-label="Default select example" id="inputYear" name="inputYear" required>
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -256,7 +256,7 @@ updateCardData();
                 <label for="inputYear">Year</label>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-floating mb-3 mb-md-0">     
                 <select class="form-select form-control" aria-label="Default select example" id="inputCourse" name="inputCourse" required>
                     <option value="BSIT">BSIT</option>
@@ -266,7 +266,23 @@ updateCardData();
                 <label for="inputCourse">Course</label>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="form-floating mb-3 mb-md-0">     
+                <select class="form-select form-control" aria-label="Default select example" id="inputSection" name="inputSection" required>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+                <label for="inputSection">Section</label>
+            </div>
+        </div>
     </div>
+
     <div class="form-floating mb-3">
         <input class="form-control" id="inputEmail" name="email" type="email" placeholder="name@example.com" required/>
         <label for="inputEmail">Email address</label>
@@ -303,11 +319,11 @@ updateCardData();
     ?>
 </div>
     </div>
-    <div class="mt-4 mb-0">
-        <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-block">Add User</button>
-        </div>
-    </div>
+    <!-- Submit and Cancel Buttons -->
+                                <div class="d-flex justify-content-between mt-4 mb-0">
+                                    <button type="submit" class="btn btn-primary">Add User</button>
+                                    <a href="usersList.php" class="btn btn-secondary">Cancel</a>
+                                </div>
 </form>
 
    
@@ -351,23 +367,27 @@ document.addEventListener('DOMContentLoaded', function() {
     var inputUserRole = document.getElementById('inputUserRole');
     var inputYear = document.getElementById('inputYear');
     var inputCourse = document.getElementById('inputCourse');
+    var inputSection = document.getElementById('inputSection');
     var inputPassword = document.getElementById('inputPassword');
 
     function handleUserRoleChange() {
         var userRole = inputUserRole.value;
 
-        // If user role is 'admin', disable and clear year and course fields
-        if (userRole === 'admin') {
+        // If user role is 'admin', 'faculty', or 'staff', disable and clear year and course fields
+        if (userRole === 'admin' || userRole === 'faculty' || userRole === 'staff') {
             inputYear.value = "";   // Clear the year field
             inputCourse.value = ""; // Clear the course field
+            inputSection.value = "";
             inputYear.disabled = true;  // Disable the year field
             inputCourse.disabled = true; // Disable the course field
-            inputPassword.disabled = false; // Enable password field for admin
+            inputSection.disabled = true;
+            inputPassword.disabled = false; // Enable password field for admin, faculty, and staff
         } else {
-            // If not admin, enable year and course fields
+            // If student, enable year and course fields
             inputYear.disabled = false;
             inputCourse.disabled = false;
-            inputPassword.disabled = true;  // Disable password field for non-admins
+            inputSection.disabled = false;
+            inputPassword.disabled = true;  // Disable password field for students
         }
     }
 

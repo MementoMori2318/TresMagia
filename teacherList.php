@@ -8,7 +8,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION
     exit;
 }
 // Fetch user data from the database
-$query = "SELECT name, user_id, year_section FROM users WHERE role IN ('Faculty', 'Admin', 'Staff')";
+$query = "SELECT * FROM users WHERE role IN ('Faculty', 'Admin', 'Staff')";
 $result = mysqli_query($conn, $query);
 
 ?>

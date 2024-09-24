@@ -156,24 +156,60 @@ error_reporting(E_ALL);
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-floating mb-3">
-                                    <input class="form-control" id="inputUserId" name="userId" type="text" placeholder="C21102307" value="<?php echo htmlspecialchars($user['user_id']); ?>" required/>
-                                    <label for="inputUserId">User ID</label>
-                                </div>
-                                <div class="row mb-3">
+                                    
+                                 <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                             <input class="form-control" id="inputUserId" name="userId" type="text" placeholder="C21102307" value="<?php echo htmlspecialchars($user['user_id']); ?>" required/>
+                                            <label for="inputUserId">User ID</label>
+                                        </div>
+                                    </div>
                                     <div class="col-md-6">
                                         <div class="form-floating mb-3">
                                             <input class="form-control" id="inputCardUid" name="inputCardUid" type="text" placeholder="Card UID" value="<?php echo htmlspecialchars($user['cards_uid']); ?>" required/>
                                             <label for="inputCardUid">Tap Card</label>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating mb-3 mb-md-0">
-                                            <input class="form-control" id="inputYearSection" name="inputYearSection" type="text" placeholder="BSIT - 3C" value="<?php echo htmlspecialchars($user['year_section']); ?>" />
-                                            <label for="inputYearSection">Year & Section</label>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">               
+                                            <select class="form-select form-control" aria-label="Default select example" id="inputYear" name="inputYear" required>
+                                                <option value="1" <?php if ($user['year'] == '1') echo 'selected'; ?>>1</option>
+                                                <option value="2" <?php if ($user['year'] == '2') echo 'selected'; ?>>2</option>
+                                                <option value="3" <?php if ($user['year'] == '3') echo 'selected'; ?>>3</option>
+                                                <option value="4" <?php if ($user['year'] == '4') echo 'selected'; ?>>4</option>
+                                            </select>
+                                            <label for="inputYear">Year</label>
                                         </div>
                                     </div>
-                                </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3 mb-md-0">     
+                                            <select class="form-select form-control" aria-label="Default select example" id="inputCourse" name="inputCourse" required>
+                                                <option value="BSIT" <?php if ($user['course'] == 'BSIT') echo 'selected'; ?>>BSIT</option>
+                                                <option value="BSIS" <?php if ($user['course'] == 'BSIS') echo 'selected'; ?>>BSIS</option>
+                                                <option value="BSCS" <?php if ($user['course'] == 'BSCS') echo 'selected'; ?>>BSCS</option>
+                                            </select>
+                                            <label for="inputCourse">Course</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3 mb-md-0">     
+                                            <select class="form-select form-control" aria-label="Default select example" id="inputSection" name="inputSection" required>
+                                                <option value="A" <?php if ($user['section'] == 'A') echo 'selected'; ?>>A</option>
+                                                <option value="B"  <?php if ($user['section'] == 'B') echo 'selected'; ?>>B</option>
+                                                <option value="C"  <?php if ($user['section'] == 'C') echo 'selected'; ?>>C</option>
+                                                <option value="D"  <?php if ($user['section'] == 'D') echo 'selected'; ?>>D</option>
+                                                <option value="E"  <?php if ($user['section'] == 'E') echo 'selected'; ?>>E</option>
+                                                <option value="F"  <?php if ($user['section'] == 'F') echo 'selected'; ?>>F</option>
+                                                <option value="G"  <?php if ($user['section'] == 'G') echo 'selected'; ?>>G</option>
+                                                <option value="H"  <?php if ($user['section'] == 'H') echo 'selected'; ?>>H</option>
+                                            </select>
+                                            <label for="inputSection">Section</label>
+                                        </div>
+                                    </div>
+                                </div>    
                                 <div class="form-floating mb-3">
                                     <input class="form-control" id="inputEmail" name="email" type="email" placeholder="name@example.com" value="<?php echo htmlspecialchars($user['email']); ?>" required/>
                                     <label for="inputEmail">Email address</label>
@@ -252,33 +288,39 @@ error_reporting(E_ALL);
 
 <script>
  
-document.addEventListener('DOMContentLoaded', function() {
-        var inputUserRole = document.getElementById('inputUserRole');
-        var inputYearSection = document.getElementById('inputYearSection');
-        var inputPassword = document.getElementById('inputPassword');
+ document.addEventListener('DOMContentLoaded', function() {
+    var inputUserRole = document.getElementById('inputUserRole');
+    var inputYear = document.getElementById('inputYear');
+    var inputCourse = document.getElementById('inputCourse');
+    var inputSection = document.getElementById('inputSection');
+    var inputPassword = document.getElementById('inputPassword');
 
-        function handleUserRoleChange() {
-            var userRole = inputUserRole.value;
+    function handleUserRoleChange() {
+        var userRole = inputUserRole.value;
 
-            if (userRole === 'student') {
-                inputYearSection.disabled = false;
-            } else {
-                inputYearSection.value = "";  // Set to empty string when not student
-                inputYearSection.disabled = true;
-            }
-
-            if (userRole === 'admin') {
-                inputPassword.disabled = false;
-            } else {
-                inputPassword.disabled = true;
-            }
+        // If user role is 'admin', 'faculty', or 'staff', disable and clear year and course fields
+        if (userRole === 'admin' || userRole === 'faculty' || userRole === 'staff') {
+            inputYear.value = "";   // Clear the year field
+            inputCourse.value = ""; // Clear the course field
+            inputSection.value = "";
+            inputYear.disabled = true;  // Disable the year field
+            inputCourse.disabled = true; // Disable the course field
+            inputSection.disabled = true;
+            inputPassword.disabled = false; // Enable password field for admin, faculty, and staff
+        } else {
+            // If student, enable year and course fields
+            inputYear.disabled = false;
+            inputCourse.disabled = false;
+            inputSection.disabled = false;
+            inputPassword.disabled = true;  // Disable password field for students
         }
+    }
 
-        inputUserRole.addEventListener('change', handleUserRoleChange);
+    inputUserRole.addEventListener('change', handleUserRoleChange);
 
-        // Initial call to set the correct state on page load
-        handleUserRoleChange();
-    });
+    // Initial call to set the correct state on page load
+    handleUserRoleChange();
+});
     const search = document.getElementById("search");
     const labels = document.querySelectorAll("#checkboxes2 > label");
 
@@ -307,6 +349,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial call to set the fixed-length display
     setPasswordFieldLength();
 });
+
+
 </script>
 
 </body>

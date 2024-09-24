@@ -27,6 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_user'])) {
     // Additional logic to handle optional fields
     $year = ($userRole === 'admin') ? NULL : htmlspecialchars(trim($_POST['inputYear']));
     $course = ($userRole === 'admin') ? NULL : htmlspecialchars(trim($_POST['inputCourse']));
+    $section = ($userRole === 'admin') ? NULL : htmlspecialchars(trim($_POST['inputSection']));
 
     // Validate email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -55,14 +56,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_user'])) {
             $user_row = $result_check_user->fetch_assoc();
             $user_id = $user_row['id'];
         } else {
-            // Insert new user with year and course (using NULL if admin)
-            $stmt_insert_user = $conn->prepare("INSERT INTO users (name, user_id, year, course, email, password, role, cards_uid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            // Insert new user with year, course, and section (using NULL if admin)
+            $stmt_insert_user = $conn->prepare("INSERT INTO users (name, user_id, year, course, section, email, password, role, cards_uid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             if ($stmt_insert_user === false) {
                 throw new Exception("Error preparing statement for inserting user: " . $conn->error);
             }
 
             // Use 'i' for integer types and pass NULL if admin
-            $stmt_insert_user->bind_param("ssssssss", $name, $userId, $year, $course, $email, $password, $userRole, $cardUid);
+            $stmt_insert_user->bind_param("sssssssss", $name, $userId, $year, $course, $section, $email, $password, $userRole, $cardUid);
 
             if (!$stmt_insert_user->execute()) {
                 throw new Exception("Error inserting user: " . $stmt_insert_user->error);
@@ -191,95 +192,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'  && isset($_POST['add_subject'])) {
         // Start Add Schedule
 
 // Handle form submission for adding a schedule
-// if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_schedule'])) {
-//     // Capture and sanitize form data
-//     $dayOfWeek = htmlspecialchars($_POST['day_of_week']);
-//     $startTime = htmlspecialchars($_POST['inputStartTime']);
-//     $endTime = htmlspecialchars($_POST['inputEndTime']);
-//     $subjectName = htmlspecialchars($_POST['subject']);
-//     $sectionName = htmlspecialchars($_POST['section']);
-
-//     // Prepare SQL to get subject_id based on subject_name
-//     $stmt = $conn->prepare("SELECT subject_id FROM subject WHERE subject_id = ?");
-//     $stmt->bind_param("s", $subjectName);
-//     $stmt->execute();
-//     $result = $stmt->get_result();
-
-//     if ($result->num_rows > 0) {
-//         $subjectRow = $result->fetch_assoc();
-//         $subjectId = $subjectRow['subject_id'];
-//     } else {
-       
-
-//         // Handle case where subject does not exist
-//         $error_message = 'Subject with name ' . $subjectName . ' not found in database.';
-//         header("Location: addSchedule.php?error_message=" . urlencode($error_message));
-//         exit();
-//     }
-
-//     // Prepare SQL to get section_id based on section_name
-//     $stmt = $conn->prepare("SELECT section_id FROM section WHERE section_id = ?");
-//     $stmt->bind_param("s", $sectionName);
-//     $stmt->execute();
-//     $result = $stmt->get_result();
-
-//     if ($result->num_rows > 0) {
-//         $sectionRow = $result->fetch_assoc();
-//         $sectionId = $sectionRow['section_id'];
-//     } else {
-       
-
-//         // Handle case where section does not exist
-//         $error_message = 'Section with name ' . $sectionName . ' not found in database.';
-//         header("Location: addSchedule.php?error_message=" . urlencode($error_message));
-//         exit();
-//     }
-
-//     // Check for schedule conflicts using DATEDIFF and TIMEDIFF (if needed)
-
-//     // Prepare SQL and bind parameters for INSERT query
-//     $stmt = $conn->prepare("INSERT INTO schedules (day_of_week, start_time, end_time, subject_id, section_id) VALUES (?, ?, ?, ?, ?)");
-//     if ($stmt === false) {
-//         die("Error preparing statement: " . $conn->error);
-//     }
-
-//     $stmt->bind_param("ssssi", $dayOfWeek, $startTime, $endTime, $subjectId, $sectionId);
-
-//     // Execute the query
-//     if ($stmt->execute()) {
-//         // Get the last inserted schedule_id
-//         $scheduleId = $stmt->insert_id;
-
-//         // Insert user_schedules records
-//         if (!empty($selectedUsers)) {
-//             $stmt = $conn->prepare("INSERT INTO user_schedules (user_id, schedule_id) VALUES (?, ?)");
-//             if ($stmt === false) {
-//                 die("Error preparing statement: " . $conn->error);
-//             }
-
-//             foreach ($selectedUsers as $userId) {
-//                 $stmt->bind_param("ii", $userId, $scheduleId);
-//                 if (!$stmt->execute()) {
-//                     echo "Error: " . $stmt->error;
-//                 }
-//             }
-
-//             // Close the user_schedules statement
-//             $stmt->close();
-//         }
-
-//         // Close the schedules statement and connection
-//         $stmt->close();
-//         $conn->close();
-
-//         // Redirect to the same page after successful insertion
-//         $success_message = "Schedule added successfully";
-//         header("Location: schedule.php?success_message=" . urlencode($success_message));
-//         exit();
-//     } else {
-//         echo "Error: " . $stmt->error;
-//     }
-// }
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add_schedule'])) {
     // Capture and sanitize form data
     $dayOfWeek = htmlspecialchars($_POST['day_of_week']);
@@ -375,7 +287,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['user_id'])) {
     $userRole = $_POST['userRole'];
     $userId = $_POST['userId'];
     $inputCardUid = $_POST['inputCardUid'];
-    $inputYearSection = $_POST['inputYearSection'];
+    $inputYear = isset($_POST['inputYear']) ? $_POST['inputYear'] : null; // Year field
+    $inputCourse = isset($_POST['inputCourse']) ? $_POST['inputCourse'] : null; // Course field
+    $inputSection = isset($_POST['inputSection']) ? $_POST['inputSection'] : null; // Section field
     $email = $_POST['email'];
     $plain_password = $_POST['password']; // Note: This is the plain text password
 
@@ -391,9 +305,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['user_id'])) {
     }
 
     // Prepare and execute UPDATE query for users table
-    $query_user = "UPDATE users SET name=?, role=?, user_id=?, cards_uid=?, year_section=?, email=?, password=? WHERE id=?";
+    $query_user = "UPDATE users SET name=?, role=?, user_id=?, cards_uid=?, year=?, course=?, section=?, email=?, password=? WHERE id=?";
     $stmt_user = $conn->prepare($query_user);
-    $stmt_user->bind_param("sssssssi", $name, $userRole, $userId, $inputCardUid, $inputYearSection, $email, $password, $user_id);
+    $stmt_user->bind_param("sssssssssi", $name, $userRole, $userId, $inputCardUid, $inputYear, $inputCourse, $inputSection, $email, $password, $user_id);
 
     if (!$stmt_user->execute()) {
         echo "Error updating user: " . $stmt_user->error;
