@@ -12,8 +12,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION
 $subjectSql = "SELECT * FROM subject";
 $subjectResult = $conn->query($subjectSql);
 
-// Query to select sections
-$sectionSql = "SELECT * FROM section";
+// Query to select sections ordered by year and section
+$sectionSql = "SELECT * FROM section ORDER BY year ASC, section ASC";
 $sectionResult = $conn->query($sectionSql);
 
 // Query to select users
@@ -337,22 +337,22 @@ $userResult = $conn->query($userSql);
                                     <div class="col-md-6">
                                         <div class="form-floating mb-3 mb-md-0">
                                             <select class="form-select form-control" id="inputSection" name="section" required onchange="filterUsersBySection()">
-                                            <option value="">Select a section</option>
-                                            <?php
-                                            if ($sectionResult->num_rows > 0) {
-                                                while ($row = $sectionResult->fetch_assoc()) {
-                                                    echo '<option value="' . $row["section_id"] . '">' . $row["section_name"] . '</option>';
+                                                <option value="">Select a section</option>
+                                                <?php
+                                                if ($sectionResult->num_rows > 0) {
+                                                    while ($row = $sectionResult->fetch_assoc()) {
+                                                        echo '<option value="' . $row["section_id"] . '">' . $row["section_name"] . ' (' . $row["year"] . ' ' . $row["section"] . ')</option>';
+                                                    }
+                                                } else {
+                                                    echo '<option value="">No sections available</option>';
                                                 }
-                                            } else {
-                                                echo '<option value="">No sections available</option>';
-                                            }
-                                            ?>
-                                        </select>
+                                                ?>
+                                            </select>
                                         <label for="inputSection">Section</label>
                                     <script>
-                                        function filterUsersBySection() {
+                                       function filterUsersBySection() {
                                             const sectionId = document.getElementById('inputSection').value;
-                                            
+
                                             // Send AJAX request to fetch filtered users based on sectionId
                                             const xhr = new XMLHttpRequest();
                                             xhr.open('POST', 'fetch_users.php', true);
@@ -364,8 +364,8 @@ $userResult = $conn->query($userSql);
                                                 }
                                             };
                                             xhr.send('section_id=' + sectionId);
-                                            
                                         }
+
                                     </script>
                                     </div>
                                 </div>
@@ -388,22 +388,22 @@ $userResult = $conn->query($userSql);
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php
-                                    if ($userResult->num_rows > 0) {
-                                        while ($row = $userResult->fetch_assoc()) {
-                                            echo "<tr>";
-                                            echo "<td><input type='checkbox' name='selected_users[]' value='{$row['id']}' class='user-checkbox'></td>";
-                                            echo "<td>" . htmlspecialchars($row['role']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['year']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['course']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['section']) . "</td>";
-                                            echo "</tr>";
-                                        }
-                                    } else {
-                                        echo "<tr><td colspan='5'>No users available</td></tr>";
+                                <?php
+                                if ($userResult->num_rows > 0) {
+                                    while ($row = $userResult->fetch_assoc()) {
+                                        echo "<tr>";
+                                        echo "<td><input type='checkbox' name='selected_users[]' value='{$row['id']}' class='user-checkbox'></td>";
+                                        echo "<td>" . htmlspecialchars($row['role']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['year']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['course']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['section']) . "</td>";
+                                        echo "</tr>";
                                     }
-                                    ?>
+                                } else {
+                                    echo "<tr><td colspan='6'>No users available</td></tr>";
+                                }
+                                ?>
                                 </tbody>
                                 
                             </table>

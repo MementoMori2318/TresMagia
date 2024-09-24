@@ -26,7 +26,7 @@ $sections = $conn->query($sectionSql);
 
 // Fetch users assigned to the current schedule
 $assignedUsersSql = "
-    SELECT u.id, u.role, u.cards_uid, u.name, u.year_section 
+    SELECT u.id, u.role, u.cards_uid, u.name, u.year, u.course, u.section 
     FROM users u
     JOIN user_schedules us ON u.id = us.users_id
     WHERE us.schedules_id = $scheduleId";
@@ -182,81 +182,86 @@ $allUsersResult = $conn->query($allUsersSql);
                                 <label for="inputDayOfWeek">Day of Week</label>
                             </div>
                             <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="time" class="form-control" id="start_time" name="start_time" value="<?php echo htmlspecialchars($schedule['start_time']); ?>" required>
-                                        <label for="inputStartTime">Start Time</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating mb-3 mb-md-0">
-                                        <input type="time" class="form-control" id="end_time" name="end_time" value="<?php echo htmlspecialchars($schedule['end_time']); ?>" required>
-                                        <label for="inputEndTime">End Time</label>
-                                    </div>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="time" class="form-control" id="start_time" name="start_time" value="<?php echo htmlspecialchars($schedule['start_time']); ?>" required>
+                                <label for="inputStartTime">Start Time</label>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="form-floating mb-3 mb-md-0">
-                                        <select class="form-select form-control" id="subject_id" name="subject_id" required>
-                                            <option value="">Select a subject</option>
-                                            <?php while ($subject = $subjects->fetch_assoc()) { ?>
-                                                <option value="<?php echo $subject['subject_id']; ?>" <?php if ($subject['subject_id'] == $schedule['subject_id']) echo 'selected'; ?>>
-                                                    <?php echo htmlspecialchars($subject['subject_name']); ?>
-                                                </option>
-                                            <?php } ?>
-                                        </select>
-                                        <label for="inputSubject">Subject</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating mb-3 mb-md-0">
-                                        <select class="form-select form-control" id="section_id" name="section_id" required>
-                                            <option value="">Select a section</option>
-                                            <?php while ($section = $sections->fetch_assoc()) { ?>
-                                                <option value="<?php echo $section['section_id']; ?>" <?php if ($section['section_id'] == $schedule['section_id']) echo 'selected'; ?>>
-                                                    <?php echo htmlspecialchars($section['section_name']); ?>
-                                                </option>
-                                            <?php } ?>
-                                        </select>
-                                        <label for="inputSection">Section</label>
-                                    </div>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3 mb-md-0">
+                                <input type="time" class="form-control" id="end_time" name="end_time" value="<?php echo htmlspecialchars($schedule['end_time']); ?>" required>
+                                <label for="inputEndTime">End Time</label>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3 mb-md-0">
+                                <select class="form-select form-control" id="subject_id" name="subject_id" required>
+                                    <option value="">Select a subject</option>
+                                    <?php while ($subject = $subjects->fetch_assoc()) { ?>
+                                        <option value="<?php echo $subject['subject_id']; ?>" <?php if ($subject['subject_id'] == $schedule['subject_id']) echo 'selected'; ?>>
+                                            <?php echo htmlspecialchars($subject['subject_name']); ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
+                                <label for="inputSubject">Subject</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3 mb-md-0">
+                                <select class="form-select form-control" id="section_id" name="section_id" required>
+                                    <option value="">Select a section</option>
+                                    <?php while ($section = $sections->fetch_assoc()) { ?>
+                                        <option value="<?php echo $section['section_id']; ?>" <?php if ($section['section_id'] == $schedule['section_id']) echo 'selected'; ?>>
+                                            <?php echo htmlspecialchars($section['section_name']); ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
+                                <label for="inputSection">Section</label>
+                            </div>
+                        </div>
+                    </div>
 
                             <!-- Table with Shared ID but Toggle Body Content -->
                             <h4>Users of this Schedule</h4>
                             <table id="datatablesSimple">
-                                <thead>
-                                    <tr>
-                                        <th data-sortable="false">
-                                            <input type="checkbox" id="checkAll">
-                                            Select All
-                                        </th>
-                                        <th>User Role</th>
-                                        <th>Card UID</th>
-                                        <th>Name</th>
-                                        <th>Year Course & Section</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="assignedUsersBody">
-                                    <?php
-                                    if ($assignedUsersResult->num_rows > 0) {
-                                        while ($row = $assignedUsersResult->fetch_assoc()) {
-                                            echo "<tr>";
-                                            echo "<td><input type='checkbox' name='selected_users[]' value='{$row['id']}' class='user-checkbox' checked></td>";
-                                            echo "<td>" . htmlspecialchars($row['role']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['cards_uid']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['year_section']) . "</td>";
-                                            echo "</tr>";
-                                        }
-                                    } else {
-                                        echo "<tr><td colspan='5'>No users assigned to this schedule</td></tr>";
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
+                        <thead>
+                            <tr>
+                                <th data-sortable="false">
+                                    <input type="checkbox" id="checkAll">
+                                    Select All
+                                </th>
+                                <th>User Role</th>
+                                <th>Card UID</th>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Course</th>
+                                <th>Section</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if ($assignedUsersResult->num_rows > 0) {
+                                while ($row = $assignedUsersResult->fetch_assoc()) {
+                                    echo "<tr>";
+                                    echo "<td><input type='checkbox' name='selected_users[]' value='{$row['id']}' class='user-checkbox' checked></td>";
+                                    echo "<td>" . htmlspecialchars($row['role']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['cards_uid']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['year']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['course']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['section']) . "</td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='7'>No users assigned to this schedule</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
 
                             <!-- Submit and Cancel Buttons -->
                             <div class="d-flex justify-content-between mt-4 mb-0">
